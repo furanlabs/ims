@@ -1,2 +1,23 @@
+# Python virtual environment
+venv/
+ENV/
+env/
+
+# Python cache files
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# IDE files (optional, if using PyCharm)
+.idea/
+*.iml
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+.db
