@@ -13,7 +13,7 @@ function deleteCookie(name) {
     document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
 }
 
-// Redirect to index.html if token is invalid or missing
+// Validate token and redirect if invalid
 async function validateToken() {
     const token = getCookie("access_token");
     if (!token) {
@@ -31,7 +31,7 @@ async function validateToken() {
         });
 
         if (!response.ok) {
-            deleteCookie("access_token"); // clear invalid token
+            deleteCookie("access_token");
             window.location.href = "../../index.html";
             return null;
         }
@@ -40,25 +40,70 @@ async function validateToken() {
         return data.user;
 
     } catch (err) {
-        deleteCookie("access_token"); // clear on network error
+        deleteCookie("access_token");
         window.location.href = "../../index.html";
         return null;
     }
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+    const token = getCookie("access_token");
     const userProfile = await validateToken();
-    if (!userProfile) return; // redirect has already happened
+    if (!userProfile) return;
 
-    // Update the DOM with the user info
-    document.getElementById("profile-id").innerText = userProfile.id;
-    document.getElementById("profile-username").innerText = userProfile.username;
-    document.getElementById("profile-email").innerText = userProfile.email;
+    const idSpan = document.getElementById("profile-id");
+    const usernameInput = document.getElementById("profile-username");
+    const emailInput = document.getElementById("profile-email");
+    const messageDiv = document.getElementById("message");
 
-    // Logout button
-    const logoutBtn = document.getElementById("logoutBtn");
-    logoutBtn.addEventListener("click", () => {
+    // Populate fields with current data
+    idSpan.innerText = userProfile.id;
+    usernameInput.value = userProfile.username;
+    emailInput.value = userProfile.email;
+
+    // Logout
+    document.getElementById("logoutBtn").addEventListener("click", () => {
         deleteCookie("access_token");
         window.location.href = "../../index.html";
+    });
+
+    // Save changes
+    document.getElementById("saveBtn").addEventListener("click", async () => {
+        const updatedUsername = usernameInput.value.trim();
+        const updatedEmail = emailInput.value.trim();
+
+        if (!updatedUsername || !updatedEmail) {
+            messageDiv.innerText = "Username and email cannot be empty.";
+            messageDiv.style.color = "red";
+            return;
+        }
+
+        try {
+            const response = await fetch(API_URL + "/users/me", {  // PATCH endpoint
+                method: "PATCH",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    username: updatedUsername,
+                    email: updatedEmail
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                messageDiv.innerText = errorData.detail || "Failed to update profile.";
+                messageDiv.style.color = "red";
+                return;
+            }
+
+            messageDiv.innerText = "Profile updated successfully!";
+            messageDiv.style.color = "green";
+
+        } catch (err) {
+            messageDiv.innerText = "Network error: " + err.message;
+            messageDiv.style.color = "red";
+        }
     });
 });

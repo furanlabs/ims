@@ -22,11 +22,15 @@ app.add_middleware(
 )
 
 from database.schema import entity
-from features.auth.api import router as users_router  # Import router only
+from features.auth.api import router as auth_router  # Import router only
 
 # Register router ONCE, with prefix
-app.include_router(users_router, prefix="/api")
+app.include_router(auth_router, prefix="/api")
 
+
+
+from features.users.api import router as users_router
+app.include_router(users_router, prefix="/api")
 
 
 

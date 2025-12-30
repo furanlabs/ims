@@ -1,16 +1,12 @@
 
 # backend.features.users.api
 
-from fastapi import APIRouter,HTTPException,Depends
+from fastapi import APIRouter,HTTPException,Depends 
 from databases import Database
-from dotenv import load_dotenv
+
 import os
 from jose import jwt
 
-load_dotenv()
-
-DATABASE_URL = os.environ.get("DATABASE_URL")
-database = Database(DATABASE_URL)
 
 
 router = APIRouter(
@@ -20,12 +16,20 @@ router = APIRouter(
 
 
 
-from .user_model import UserCreate,UserLogIn
+from .auth_model import UserCreate,UserLogIn
 
 from core.utils import hash_password,verify_password,create_access_token,get_current_user_id
 
+
+# Dependency to get database
+def get_database():
+    from main import database  # Import the singleton database object
+    return database
+
+
+
 @router.post("/register")
-async def register_user(user: UserCreate):
+async def register_user(user: UserCreate,database: Database = Depends(get_database)):
     
     
     password_hash = hash_password(user.password_hash)
@@ -60,7 +64,7 @@ async def register_user(user: UserCreate):
 
 
 @router.post("/login")
-async def login_user(user: UserLogIn):
+async def login_user(user: UserLogIn,database: Database = Depends(get_database)):
     query = "SELECT * FROM users WHERE email = :email"
     db_user = await database.fetch_one(query=query, values={"email": user.email})
     
@@ -75,10 +79,8 @@ async def login_user(user: UserLogIn):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-
-
 @router.get("/me")
-async def verify_user(user_id = Depends(get_current_user_id)):
+async def verify_user(user_id = Depends(get_current_user_id),database: Database = Depends(get_database)):
 
     query = "SELECT id, username, email FROM users WHERE id = :id"
     user = await database.fetch_one(query=query, values={"id": user_id})
