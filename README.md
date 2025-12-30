@@ -1,2 +1,1 @@
-# ims
-A lightweight Inventory Management System (IMS) built for personal Python practice. Designed to keep programming skills fresh by practicing CRUD operations, data management, and basic FastAPI endpoints. Not intended for production.
+This project is a simple Inventory Management System meant as a learning and memory-maintenance tool. It allows adding, updating, and tracking products and stock transactions, helping me (and others) stay sharp with Python, database handling, and FastAPI. Perfect for experimenting with new ideas or refreshing core programming skills without the pressure of production-ready software.
