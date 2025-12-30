@@ -14,8 +14,8 @@ database = Database(DATABASE_URL)
 
 
 router = APIRouter(
-    prefix="/users",
-    tags=["users"]
+    prefix="/auth",
+    tags=["Auth"]
 )
 
 

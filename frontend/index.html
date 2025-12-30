@@ -12,12 +12,16 @@
     <h2 id="form-title">Login</h2>
     <div class="error" id="error"></div>
     <div class="success" id="success"></div>
-    <input type="text" id="username" placeholder="Username">
-    <input type="password" id="password" placeholder="Password">
+
+    <input type="text" id="username" placeholder="Username" style="display:none;">
+    <input type="text" id="email" placeholder="Email">
+    <input type="password" id="password_hash" placeholder="Password">
+
     <button id="submitBtn">Login</button>
     <div class="toggle" id="toggleForm">Don't have an account? Register</div>
 </div>
 
-<script src="resource/js/main.js"></script>
+
+<script type="module" src="resource/js/main.js"></script>
 </body>
 </html>

@@ -4,16 +4,25 @@ from fastapi import FastAPI, status
 from databases import Database
 from dotenv import load_dotenv
 import os
-
+from fastapi.middleware.cors import CORSMiddleware
+    
 load_dotenv()
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 database = Database(DATABASE_URL)
 
 app = FastAPI(title="Simple IMS API")
+# Allow all origins (for development)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # <- allow all origins
+    allow_credentials=True,
+    allow_methods=["*"],   # <- allow all HTTP methods
+    allow_headers=["*"],   # <- allow all headers
+)
 
 from database.schema import entity
-from features.users.api import router as users_router  # Import router only
+from features.auth.api import router as users_router  # Import router only
 
 # Register router ONCE, with prefix
 app.include_router(users_router, prefix="/api")
