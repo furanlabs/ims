@@ -82,7 +82,7 @@ async def login_user(user: UserLogIn,database: Database = Depends(get_database))
 @router.get("/me")
 async def verify_user(user_id = Depends(get_current_user_id),database: Database = Depends(get_database)):
 
-    query = "SELECT id, username, email FROM users WHERE id = :id"
+    query = "SELECT id, username, email ,img_link FROM users WHERE id = :id"
     user = await database.fetch_one(query=query, values={"id": user_id})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

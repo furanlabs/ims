@@ -23,7 +23,7 @@ def get_database():
     return database
 
 
-from .user_model import UserPatch
+from .user_model import UserPatch,UserImgPatch
 
 
 
@@ -47,6 +47,31 @@ async def update_user_account(
     values = {
         "username": user.username,
         "email": user.email,
+        "id": user_id
+    }
+
+    try:
+        await database.execute(query=query, values=values)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return {"message": "Account updated successfully"}
+
+
+
+@router.patch("/me/img")
+async def update_user_img( user: UserImgPatch,
+    user_id: int = Depends(get_current_user_id),
+    database: Database = Depends(get_database)):
+
+    query = """
+    UPDATE users
+    SET img_link = :img_link
+    WHERE id = :id
+    """
+
+    values = {
+        "img_link": user.img_link,
         "id": user_id
     }
 

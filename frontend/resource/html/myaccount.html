@@ -10,16 +10,31 @@
 
 <div class="profile-container">
     <h2>User Profile</h2>
-    
+
     <div class="profile-item">
-        <strong>ID:</strong> <span id="profile-id">Loading...</span>
+        <strong>ID:</strong>
+        <span id="profile-id">Loading...</span>
     </div>
-    
+
     <div class="profile-item">
-        <strong>Username:</strong> <input type="text" id="profile-username" />
+        <strong>Username:</strong>
+        <input type="text" id="profile-username" />
     </div>
+
     <div class="profile-item">
-        <strong>Email:</strong> <input type="email" id="profile-email" />
+        <strong>Email:</strong>
+        <input type="email" id="profile-email" />
+    </div>
+
+    <div class="profile-item">
+        <strong>Profile Image URL:</strong>
+        <input type="text" id="profile-img-link" placeholder="Paste image URL here" />
+        <button id="updateImgBtn">Update Image</button>
+    </div>
+
+    <div class="profile-item">
+        <strong>Preview:</strong>
+        <img id="profile-img" src="" alt="User Image" />
     </div>
 
     <button id="saveBtn">Save Changes</button>
