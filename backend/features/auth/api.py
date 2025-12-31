@@ -1,5 +1,5 @@
 
-# backend.features.users.api
+# backend.features.auth.api
 
 from fastapi import APIRouter,HTTPException,Depends 
 from databases import Database
@@ -28,23 +28,26 @@ def get_database():
 
 
 
+import uuid
+
+
 @router.post("/register")
 async def register_user(user: UserCreate,database: Database = Depends(get_database)):
     
-    
+    user_id = str(uuid.uuid4())
+
     password_hash = hash_password(user.password_hash)
 
-
-    
     query = """
-    INSERT INTO users (
+    INSERT INTO users (id,
         username, email, password_hash
-    ) VALUES (
+    ) VALUES (:id,
         :username, :email, :password_hash
     )
     """
     
     values = {
+        "id": user_id,
         "username": user.username,
         "email": user.email,
         "password_hash": password_hash
@@ -79,14 +82,37 @@ async def login_user(user: UserLogIn,database: Database = Depends(get_database))
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.get("/me")
-async def verify_user(user_id = Depends(get_current_user_id),database: Database = Depends(get_database)):
 
-    query = "SELECT id, username, email ,img_link FROM users WHERE id = :id"
-    user = await database.fetch_one(query=query, values={"id": user_id})
+
+
+
+
+from fastapi.security import OAuth2PasswordRequestForm
+
+@router.post("/authorized")
+async def login_user(form_data: OAuth2PasswordRequestForm = Depends(), database: Database = Depends(get_database)):
+    # Use email instead of username
+    query = "SELECT * FROM users WHERE email = :email"
+    db_user = await database.fetch_one(query=query, values={"email": form_data.username})
+    
+    if not db_user or not verify_password(form_data.password, db_user["password_hash"]):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    
+    access_token = create_access_token(data={"user_id": db_user["id"]})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+
+
+
+@router.get("/me")
+async def verify_user(user = Depends(get_current_user_id),database: Database = Depends(get_database)):
+
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
     return {"user": dict(user)}
+
+
 
 

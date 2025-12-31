@@ -60,6 +60,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const saveBtn = document.getElementById("saveBtn");
     const updateImgBtn = document.getElementById("updateImgBtn");
     const logoutBtn = document.getElementById("logoutBtn");
+    const deleteBtn = document.getElementById("deleteBtn");
 
     // Populate fields
     idSpan.innerText = userProfile.id;
@@ -154,4 +155,94 @@ document.addEventListener("DOMContentLoaded", async () => {
             messageDiv.style.color = "red";
         }
     });
+
+    // --- Delete account ---
+    deleteBtn.addEventListener("click", async () => {
+        if (!confirm("Are you sure you want to delete your account? This cannot be undone.")) return;
+
+        try {
+            const response = await fetch(API_URL + "/users/me", {
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                },
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                messageDiv.innerText = errorData.detail || "Failed to delete account.";
+                messageDiv.style.color = "red";
+                return;
+            }
+
+            messageDiv.innerText = "Account deleted successfully!";
+            messageDiv.style.color = "green";
+            deleteCookie("access_token");
+            setTimeout(() => window.location.href = "../../index.html", 1500);
+
+        } catch (err) {
+            messageDiv.innerText = "Network error: " + err.message;
+            messageDiv.style.color = "red";
+        }
+    });
+
+
+    // --- Change password ---
+const oldPasswordInput = document.getElementById("old-password");
+const newPasswordInput = document.getElementById("new-password");
+const confirmNewPasswordInput = document.getElementById("confirm-new-password");
+const changePasswordBtn = document.getElementById("changePasswordBtn");
+
+changePasswordBtn.addEventListener("click", async () => {
+    const oldPassword = oldPasswordInput.value.trim();
+    const newPassword = newPasswordInput.value.trim();
+    const confirmNewPassword = confirmNewPasswordInput.value.trim();
+
+    if (!oldPassword || !newPassword || !confirmNewPassword) {
+        messageDiv.innerText = "All password fields are required.";
+        messageDiv.style.color = "red";
+        return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+        messageDiv.innerText = "New passwords do not match.";
+        messageDiv.style.color = "red";
+        return;
+    }
+
+    try {
+        const response = await fetch(API_URL + "/me/password", {
+            method: "PATCH",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                old_password_hash: oldPassword,
+                new_password_hash: newPassword,
+                confirm_new_password_hash: confirmNewPassword
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            messageDiv.innerText = errorData.detail || "Failed to change password.";
+            messageDiv.style.color = "red";
+            return;
+        }
+
+        messageDiv.innerText = "Password changed successfully!";
+        messageDiv.style.color = "green";
+
+        // Clear password fields
+        oldPasswordInput.value = "";
+        newPasswordInput.value = "";
+        confirmNewPasswordInput.value = "";
+
+    } catch (err) {
+        messageDiv.innerText = "Network error: " + err.message;
+        messageDiv.style.color = "red";
+    }
+});
+
 });

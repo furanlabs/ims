@@ -51,6 +51,7 @@ app.include_router(users_router, prefix="/api")
 async def startup():
     await database.connect()
     await entity.users(database)
+    await entity.products(database)
 
 @app.on_event("shutdown")
 async def shutdown():
